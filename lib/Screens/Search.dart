@@ -32,7 +32,7 @@ class _SearchState extends State<Search> {
   int counter = 0;
   late SearchWallpaperBloc _wallpaperBloc;
 
-  // TextEditingController searchController = TextEditingController();
+  TextEditingController searchController = TextEditingController();
 
   // final FocusNode _focusNode = FocusNode();
   Icon actionIcon = Icon(Icons.search);
@@ -49,6 +49,7 @@ class _SearchState extends State<Search> {
         automaticallyImplyLeading: false,
         elevation: 0,
         title: OutlineSearchBar(
+          textEditingController: searchController,
           borderColor: Colors.green,
           hintText: 'Search',
           searchButtonIconColor: Colors.green,
@@ -200,7 +201,10 @@ class _SearchState extends State<Search> {
                               !context.read<SearchWallpaperBloc>().isFetching) {
                             context.read<SearchWallpaperBloc>()
                               ..isFetching = true
-                              ..add(SearchWallpaper(search: 'wallpaper'));
+                              ..add(SearchWallpaper(
+                                  search: searchController.text.isEmpty
+                                      ? 'wallpaper'
+                                      : searchController.text));
                           }
                         }),
                       child: Column(

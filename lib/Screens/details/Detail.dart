@@ -43,6 +43,16 @@ class _DetailViewState extends State<DetailView> {
   @override
   void initState() {
     super.initState();
+    _setWallPaper();
+    if (permission == false) {
+      print("Requesting Permission");
+      _permissionRequest();
+    } else {
+      print("Permission Granted.");
+    }
+  }
+
+  void _setWallPaper() {
     context.read<DownloadBackgroundBloc>().add(DownloadStarted(
           url: widget.wallpaper.original ?? '',
           whenComplete: (file) {
@@ -89,6 +99,11 @@ class _DetailViewState extends State<DetailView> {
     return Scaffold(
       floatingActionButtonLocation: ExpandableFab.location,
       floatingActionButton: ExpandableFab(
+        onOpen: () {
+          if (permission == false) {
+            _permissionRequest();
+          }
+        },
         child: Image.asset(
           'assets/image/paint_icon.png',
           color: Colors.white,
