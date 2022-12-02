@@ -1,17 +1,26 @@
-import 'package:anim_search_bar/anim_search_bar.dart';
+import 'dart:io';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
+import 'package:outline_search_bar/outline_search_bar.dart';
+import 'package:provider/provider.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:wall_par_flutter/Bloc/searchWallpaperBloc.dart';
 import 'package:wall_par_flutter/Bloc/wallpaperEvent.dart';
 import 'package:wall_par_flutter/Bloc/wallpaperState.dart';
 import 'package:wall_par_flutter/Model/wallpaper.dart';
-import 'package:wall_par_flutter/Screens/Detail.dart';
+import 'package:wall_par_flutter/Screens/controllers/i_see_image_controller.dart';
+import 'package:wall_par_flutter/Screens/details/details_page.dart';
 
 class Search extends StatefulWidget {
+  final Function(File? file) whenCompleteFunction;
+
+  const Search({super.key, required this.whenCompleteFunction});
+
   @override
   _SearchState createState() => _SearchState();
 }
@@ -22,35 +31,35 @@ class _SearchState extends State<Search> {
 
   int counter = 0;
   late SearchWallpaperBloc _wallpaperBloc;
-  TextEditingController searchController = TextEditingController();
+
+  // TextEditingController searchController = TextEditingController();
 
   // final FocusNode _focusNode = FocusNode();
   Icon actionIcon = Icon(Icons.search);
 
   @override
   Widget build(BuildContext context) {
-    _wallpaperBloc = BlocProvider.of<SearchWallpaperBloc>(context);
-    _wallpaperBloc.add(SearchWallpaper(search: 'wallpaper'));
+    // _wallpaperBloc = BlocProvider.of<SearchWallpaperBloc>(context);
+    // _wallpaperBloc.add(SearchWallpaper(search: 'wallpaper'));
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         actionsIconTheme: IconThemeData(color: Colors.black),
         iconTheme: IconThemeData(color: Colors.black),
+        automaticallyImplyLeading: false,
         elevation: 0,
-        title: AnimSearchBar(
-          autoFocus: true,
-          color: Color(0xff4AA96C),
-          closeSearchOnSuffixTap: true,
-          width: MediaQuery.of(context).size.width - 32,
-          textController: searchController,
-          suffixIcon: Icon(Icons.search),
-          onSuffixTap: () {
-            wallpaper.clear();
-            context.read<SearchWallpaperBloc>()
-              ..isFetching = true
-              ..add(SearchWallpaper(search: searchController.text));
-          },
+        title: OutlineSearchBar(
+          borderColor: Colors.green,
+          hintText: 'Search',
+          searchButtonIconColor: Colors.green,
+          cursorColor: Colors.green,
+          borderRadius: BorderRadius.all(Radius.circular(12)),
+          onSearchButtonPressed: searchFunction,
+          // onTypingFinished: searchFunction,
         ),
+
+        ///Search
+
         // title: TextField(
         //   autofocus: true,
         //   // focusNode: _focusNode,
@@ -85,30 +94,33 @@ class _SearchState extends State<Search> {
     );
   }
 
-  void openPage(Wallpaper wallpaper) {
-    counter++;
-    Navigator.push(
+  void openPage(int index, ISeeImageController provider) async {
+    // Navigation
+    final result = await Navigator.push(
       context,
-      CupertinoPageRoute(
-        builder: (context) => Detail(
-          wallpaper: wallpaper,
-        ),
-      ),
+      MaterialPageRoute(
+          builder: (context) => DetailsPage(
+                whenComplete: widget.whenCompleteFunction,
+                wallpaper: wallpaper[index],
+              )),
     );
+    if (result == true) {
+      provider.changeISee(index);
+    }
   }
 
-  void showAd(Wallpaper wallpaper) {
-    //TODO add Ad
-    counter = 0;
-    Navigator.push(
-      context,
-      CupertinoPageRoute(
-        builder: (context) => Detail(
-          wallpaper: wallpaper,
-        ),
-      ),
-    );
-  }
+  // void showAd(Wallpaper wallpaper) {
+  //   //TODO add Ad
+  //   counter = 0;
+  //   Navigator.push(
+  //     context,
+  //     CupertinoPageRoute(
+  //       builder: (context) => Detail(
+  //         wallpaper: wallpaper,
+  //       ),
+  //     ),
+  //   );
+  // }
 
   Widget _data(BuildContext context) {
     var size = MediaQuery.of(context).size;
@@ -123,6 +135,8 @@ class _SearchState extends State<Search> {
       },
       child: Center(
         child: BlocConsumer<SearchWallpaperBloc, WallpaperState>(
+          // bloc: BlocProvider.of<SearchWallpaperBloc>(context)
+          //   ..add(SearchWallpaper(search: 'wallpaper')),
           listener: (context, state) {
             if (state is SearchWallpaperIsLoading) {
               // Scaffold.of(context)
@@ -157,125 +171,151 @@ class _SearchState extends State<Search> {
                 children: [
                   IconButton(
                     onPressed: () {
-                      context.bloc<SearchWallpaperBloc>()
+                      context.read<SearchWallpaperBloc>()
                         ..isFetching = true
                         ..add(SearchWallpaper(search: 'wallpaper'));
                     },
                     icon: Icon(Icons.refresh),
                   ),
                   const SizedBox(height: 15),
-                  Text('Error', textAlign: TextAlign.center),
+                  Text('Retry', textAlign: TextAlign.center),
                 ],
               );
             }
-            return SingleChildScrollView(
-              controller: _scrollController
-                ..addListener(() {
-                  if (_scrollController.offset ==
-                          _scrollController.position.maxScrollExtent &&
-                      !context.read<SearchWallpaperBloc>().isFetching) {
-                    context.read<SearchWallpaperBloc>()
-                      ..isFetching = true
-                      ..add(SearchWallpaper(search: 'feather'));
-                  }
-                }),
-              child: Column(
-                children: [
-                  GridView.builder(
-                    padding: EdgeInsets.zero,
-                    physics: NeverScrollableScrollPhysics(),
-                    shrinkWrap: true,
-                    itemCount: wallpaper.length,
-                    gridDelegate: SliverQuiltedGridDelegate(
-                      crossAxisCount: 4,
-                      mainAxisSpacing: 4,
-                      crossAxisSpacing: 4,
-                      repeatPattern: QuiltedGridRepeatPattern.inverted,
-                      pattern: [
-                        QuiltedGridTile(2, 2),
-                        QuiltedGridTile(1, 2),
-                        QuiltedGridTile(1, 1),
-                        QuiltedGridTile(1, 1),
-                      ],
-                    ),
-                    itemBuilder: (context, index) => Stack(
-                      fit: StackFit.expand,
-                      children: [
-                        Container(
-                          child: GestureDetector(
-                            onTap: () {
-                              // counter == 2
-                              //     ? showAd(wallpaper[index])
-                              //     :
-                              openPage(wallpaper[index]);
-                            },
-                            child: Card(
-                              color: Color(0xff4AA96C).withOpacity(.7),
-                              semanticContainer: true,
-                              clipBehavior: Clip.antiAliasWithSaveLayer,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              child: Hero(
-                                  tag: wallpaper[index].portrait ?? '1',
-                                  child: ColorFiltered(
-                                    colorFilter: ColorFilter.mode(
-                                        wallpaper[index].isDownloading ?? false
-                                            ? Colors.grey
-                                            : Colors.transparent,
-                                        BlendMode.color),
-                                    child: CachedNetworkImage(
-                                      imageUrl: wallpaper[index].portrait ?? '',
-                                      fit: BoxFit.cover,
-                                      // memCacheHeight: 500,
-                                      // memCacheWidth: 500,
-                                      placeholder: (context, url) =>
-                                          Image.asset(
-                                              'assets/image/wall_par_logo.png'),
-                                    ),
-                                  )
-                                  //   child: ColorFiltered(
-                                  //   colorFilter: ColorFilter.mode(
-                                  //       wallpaper[index].isDownloading ?? false
-                                  //           ? Colors.grey
-                                  //           : Colors.transparent,
-                                  //       BlendMode.color),
-                                  //   child: FadeInImage.assetNetwork(
-                                  //     image: wallpaper[index].portrait ?? '',
-                                  //     fit: BoxFit.cover,
-                                  //     placeholder:
-                                  //         "assets/image/wall_par_logo.png",
-                                  //     imageScale: 1,
-                                  //     imageCacheHeight: 200,
-                                  //     imageCacheWidth: 200,
-                                  //   ),
-                                  // ),
+            if (wallpaper.isEmpty)
+              return Center(
+                child: Text('Not Found'),
+              );
+            else
+              return ChangeNotifierProvider(
+                create: (BuildContext context) =>
+                    ISeeImageController(wallpaper),
+                child: Consumer<ISeeImageController>(
+                  builder: (context, provider, child) {
+                    return SingleChildScrollView(
+                      controller: _scrollController
+                        ..addListener(() {
+                          if (_scrollController.offset ==
+                                  _scrollController.position.maxScrollExtent &&
+                              !context.read<SearchWallpaperBloc>().isFetching) {
+                            context.read<SearchWallpaperBloc>()
+                              ..isFetching = true
+                              ..add(SearchWallpaper(search: 'wallpaper'));
+                          }
+                        }),
+                      child: Column(
+                        children: [
+                          GridView.builder(
+                            padding: EdgeInsets.zero,
+                            physics: NeverScrollableScrollPhysics(),
+                            shrinkWrap: true,
+                            itemCount: wallpaper.length,
+                            gridDelegate: SliverQuiltedGridDelegate(
+                              crossAxisCount: 4,
+                              mainAxisSpacing: 4,
+                              crossAxisSpacing: 4,
+                              repeatPattern: QuiltedGridRepeatPattern.inverted,
+                              pattern: [
+                                QuiltedGridTile(2, 2),
+                                QuiltedGridTile(1, 2),
+                                QuiltedGridTile(1, 1),
+                                QuiltedGridTile(1, 1),
+                              ],
+                            ),
+                            itemBuilder: (context, index) => Stack(
+                              fit: StackFit.expand,
+                              children: [
+                                Container(
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      // counter == 2
+                                      //     ? showAd(wallpaper[index])
+                                      //     :
+                                      openPage(index, provider);
+                                    },
+                                    child: Card(
+                                        color:
+                                            Color(0xff4AA96C).withOpacity(.7),
+                                        semanticContainer: true,
+                                        clipBehavior:
+                                            Clip.antiAliasWithSaveLayer,
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(10),
+                                        ),
+                                        child: CachedNetworkImage(
+                                          imageUrl:
+                                              wallpaper[index].portrait ?? '',
+                                          fit: BoxFit.cover,
+                                          // memCacheHeight: 500,
+                                          // memCacheWidth: 500,
+                                          placeholder: (context, url) =>
+                                              Image.asset(
+                                                  'assets/image/wall_par_logo.png'),
+                                        )
+                                        //   child: ColorFiltered(
+                                        //   colorFilter: ColorFilter.mode(
+                                        //       wallpaper[index].isDownloading ?? false
+                                        //           ? Colors.grey
+                                        //           : Colors.transparent,
+                                        //       BlendMode.color),
+                                        //   child: FadeInImage.assetNetwork(
+                                        //     image: wallpaper[index].portrait ?? '',
+                                        //     fit: BoxFit.cover,
+                                        //     placeholder:
+                                        //         "assets/image/wall_par_logo.png",
+                                        //     imageScale: 1,
+                                        //     imageCacheHeight: 200,
+                                        //     imageCacheWidth: 200,
+                                        //   ),
+                                        // ),
+                                        ),
                                   ),
+                                ),
+                                if (provider.wallpaper[index].iSee ?? false)
+                                  Positioned(
+                                      top: 5,
+                                      right: 10,
+                                      child: Shimmer.fromColors(
+                                        baseColor: Colors.black,
+                                        highlightColor: Colors.grey[300]!,
+                                        child: Icon(
+                                          Icons.remove_red_eye_outlined,
+                                          color: Colors.white,
+                                        ),
+                                      )),
+                              ],
                             ),
                           ),
-                        ),
-                        if (wallpaper[index].isDownloading ?? false)
-                          Image.asset('assets/image/download.gif'),
-                      ],
-                    ),
-                    // if (wallpaper[index].downloadValue != null)
-                  ),
-                  SizedBox(
-                    height: 10,
-                  ),
-                  if (context.read<SearchWallpaperBloc>().isFetching)
-                    Center(
-                        child: LoadingAnimationWidget.threeRotatingDots(
-                            color: Colors.black, size: 20)),
-                  SizedBox(
-                    height: 100,
-                  )
-                ],
-              ),
-            );
+
+                          // if (wallpaper[index].downloadValue != null)
+
+                          SizedBox(
+                            height: 10,
+                          ),
+                          if (context.read<SearchWallpaperBloc>().isFetching)
+                            Center(
+                                child: LoadingAnimationWidget.threeRotatingDots(
+                                    color: Colors.black, size: 20)),
+                          SizedBox(
+                            height: 100,
+                          )
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              );
           },
         ),
       ),
     );
+  }
+
+  void searchFunction(String value) {
+    wallpaper.clear();
+    context.read<SearchWallpaperBloc>()
+      ..isFetching = true
+      ..add(SearchWallpaper(search: value));
   }
 }

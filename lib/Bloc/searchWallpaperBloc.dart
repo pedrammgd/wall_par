@@ -12,12 +12,9 @@ class SearchWallpaperBloc extends Bloc<WallpaperEvent, WallpaperState> {
   final SearchPageRepository searchPageRepository;
   int page = 1;
   bool isFetching = false;
-  var random = Random();
 
   SearchWallpaperBloc(this.searchPageRepository)
-      : super(SearchWallpaperInitial()) {
-    page = random.nextInt(10);
-  }
+      : super(SearchWallpaperInitial());
 
   @override
   Stream<WallpaperState> mapEventToState(WallpaperEvent event) async* {

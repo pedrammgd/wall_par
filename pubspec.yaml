@@ -39,7 +39,7 @@ dependencies:
   easy_permission_validator: ^4.0.0
   equatable: ^1.1.1
   flutter_bloc: ^6.0.5
-  fluttertoast: ^7.1.6
+
   getwidget: ^1.2.4
   google_nav_bar: ^5.0.6
   http: ^0.13.5
@@ -47,14 +47,23 @@ dependencies:
   path_provider: ^2.0.11
   share: ^0.6.3+1
   url_launcher: ^6.1.6
-  wallpaper_manager: ^1.0.10
+#  wallpaper_manager: ^1.0.10
   flutter_staggered_grid_view: ^0.6.2
   cached_network_image: ^3.1.0
   akar_icons_flutter: ^1.1.11
   loading_animation_widget: ^1.2.0+3
   progress_value_button: ^0.0.1
-  dio_http_cache: ^0.3.0
-  anim_search_bar: ^2.0.2
+
+  outline_search_bar: ^2.3.0
+  shimmer: ^2.0.0
+  google_fonts: ^3.0.1
+  wallpaper_manager_flutter: ^0.0.2
+  flutter_cache_manager: ^3.3.0
+  flutter_expandable_fab: ^1.6.1
+  top_snackbar_flutter: ^3.0.0
+  provider: ^4.3.3
+
+
 
 
 dev_dependencies:

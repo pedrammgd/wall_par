@@ -4,7 +4,7 @@ abstract class DownloadBackgroundEvent {}
 
 class DownloadStarted extends DownloadBackgroundEvent {
   final String url;
-  final Function(Directory? dir) whenComplete;
+  final Function(File? file) whenComplete;
   DownloadStarted({
     required this.url,
     required this.whenComplete,

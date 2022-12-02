@@ -1,9 +1,18 @@
-import 'package:flutter/cupertino.dart';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:wall_par_flutter/Bloc/categoryWallpaperBloc.dart';
+import 'package:wall_par_flutter/Bloc/wallpaperEvent.dart';
 import 'package:wall_par_flutter/Model/cateogry.dart';
 import 'package:wall_par_flutter/Screens/Category.dart' as category;
+import 'package:wall_par_flutter/Screens/category_page.dart';
+import 'package:wall_par_flutter/repositories/category_page_repository.dart';
 
 class CategoryList extends StatefulWidget {
+  final Function(File? file) whenCompleteFunction;
+
+  const CategoryList({super.key, required this.whenCompleteFunction});
   @override
   _CategoryListState createState() => _CategoryListState();
 }
@@ -23,8 +32,10 @@ class _CategoryListState extends State<CategoryList>
                 Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => category.Category(
-                            category: categoryList[index].name)));
+                        builder: (context) => CategoryPage(
+                              title: categoryList[index].name,
+                              whenCompleteFunction: widget.whenCompleteFunction,
+                            )));
               },
               child: Stack(
                 children: [

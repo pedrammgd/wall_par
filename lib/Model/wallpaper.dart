@@ -1,14 +1,14 @@
 class Wallpaper {
   String? original;
   String? portrait;
-  bool? isDownloading;
+  bool? iSee;
 
-  Wallpaper({this.original, this.portrait, this.isDownloading});
+  Wallpaper({this.original, this.portrait, this.iSee = false});
 
   Wallpaper.fromMap(Map<String, dynamic> map) {
     this.original = map["src"]["original"];
     this.portrait = map["src"]["portrait"];
-    this.isDownloading = map["src"]["isDownloading"];
+    this.iSee = map["src"]["iSee"];
   }
 
   toJson() {

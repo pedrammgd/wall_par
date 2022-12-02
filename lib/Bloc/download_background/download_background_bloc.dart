@@ -40,4 +40,9 @@ class DownloadBackgroundBloc
       yield DownloadFailure();
     }
   }
+
+  @override
+  Future<void> close() {
+    return super.close();
+  }
 }

@@ -1,7 +1,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.wall_par_flutter">
+    <uses-permission android:name="android.permission.INTERNET" />
    <application
-        android:label="wall_par_flutter"
+        android:label="Wall Par"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

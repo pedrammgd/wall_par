@@ -13,7 +13,7 @@ class Category {
 List<Category> categoryList = [
   Category(
     image: AssetImage("assets/image/hollywood.jpg"),
-    name: "Actors",
+    name: "Dark",
   ),
   Category(
     image: AssetImage("assets/image/Christmas.jpeg"),
@@ -25,7 +25,7 @@ List<Category> categoryList = [
   ),
   Category(
     image: AssetImage("assets/image/animal.jpg"),
-    name: "Animal",
+    name: "Animals",
   ),
   Category(
     image: AssetImage("assets/image/pizza.jpg"),

@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:dio/dio.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:path_provider/path_provider.dart';
 
 class DownloadService {
@@ -11,12 +12,19 @@ class DownloadService {
   Future<void> downloadFile(
       {required String url,
       Future<void> Function(int, int)? onReceiveProgress,
-      required Function(Directory? dir) whenComplete}) async {
-    final downloadDir = await getApplicationDocumentsDirectory();
-    final saveFilePath = '${downloadDir.path}/wallpar.png';
+      required Function(File? file) whenComplete}) async {
+    File file = await DefaultCacheManager().getSingleFile(url);
+
+    // final downloadDir = await getApplicationDocumentsDirectory();
+    // var saveFilePath = '${downloadDir.path}/wallpar.png';
+    // var saveFilePath = '${file.path}/wallpar.png';
+    // file.readAsString().then((String contents) {
+    //   print(contents);
+    // });
+    var saveFilePath = '${file.path}/wallpar.png';
     await _dio
         .download(url, saveFilePath, onReceiveProgress: onReceiveProgress)
-        .whenComplete(() => whenComplete(downloadDir));
+        .whenComplete(() => whenComplete(file));
   }
 }
 
